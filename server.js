@@ -1,38 +1,51 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const Budget = require('./models/budget');
 const app = express();
 const port = 3000;
 
-const budget = {
-    myBudget: [
-        {
-            title: 'Eat Out',
-            budget: 30
-        },
-        {
-            title: 'Rent',
-            budget: 350
-        },
-        {
-            title: 'Groceries',
-            budget: 90
-        }
-    ]
-};
-
-// Serve static files from the 'public' directory
+// Middleware
+app.use(express.json());
+app.use(cors());
 app.use(express.static('public'));
 
-// Handle the root route
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html');
+// Connect to MongoDB
+mongoose.connect('mongodb://localhost:27017/personal_budget', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('Could not connect to MongoDB:', err));
+
+// GET endpoint - Fetch budget data
+app.get('/budget', async (req, res) => {
+    try {
+        const budgetData = await Budget.find();
+        res.json({ myBudget: budgetData });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
-// Handle the /budget route
-app.get('/budget', (req, res) => {
-    res.json(budget);
+// POST endpoint - Add new budget data
+app.post('/budget', async (req, res) => {
+    try {
+        const newBudgetItem = new Budget(req.body);
+        await newBudgetItem.save();
+        res.status(201).json(newBudgetItem);
+    } catch (err) {
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ message: err.message });
+        }
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Personal Budget API running at http://localhost:${port}`);
 });
+

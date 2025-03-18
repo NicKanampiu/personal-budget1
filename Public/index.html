@@ -40,9 +40,9 @@
 <body>
     <nav class="menu" aria-label="Main Navigation">
         <ul>
-            <li><a href="/">Homepage</a></li>
-            <li><a href="/about.html">About</a></li>
-            <li><a href="/login.html">Login</a></li>
+            <li><a href="index.html">Homepage</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="login.html">Login</a></li>
             <li><a href="https://google.com">Google</a></li>
         </ul>
     </nav>
@@ -138,29 +138,24 @@
                 .domain(["Eat Out", "Rent", "Groceries", "Utilities", "Transportation", "Entertainment", "Healthcare", "Savings", "Insurance", "Miscellaneous"])
                 .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00", "#ffcd56", "#ff6384", "#36a2eb"]);
 
-            d3.json("budget_data.json", function(error, data) {
-                if (error) throw error;
+d3.json("/budget", function(error, data) {
+    if (error) throw error;
 
-                // Extract the "myBudget" array from the JSON data
-                var budgetData = data.myBudget;
+    // Extract the "myBudget" array from the JSON data
+    var budgetData = data.myBudget;
 
-                // Map the data to the format expected by the chart
-                var chartData = budgetData.map(function(item) {
-                    return {
-                        label: item.title,
-                        value: item.budget
-                    };
-                });
+    // Map the data to the format expected by the chart
+    var chartData = budgetData.map(function(item) {
+        return {
+            label: item.title,
+            value: item.value,
+            color: item.color
+        };
+    });
 
-                // Initialize the chart with the loaded data
-                change(chartData);
-
-                // Randomize button functionality
-                d3.select(".randomize")
-                    .on("click", function() {
-                        change(randomData(budgetData));
-                    });
-            });
+    // Initialize the chart with the loaded data
+    change(chartData);
+});
 
             function randomData(data) {
                 return data.map(function(item) {
